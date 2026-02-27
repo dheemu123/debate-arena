@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI } from "@google/genai";
 import type { DebaterAdapter, JudgeAdapter, LLMCallResult } from "./types";
 
 const OPENAI_PROVIDER = "openai";
@@ -169,22 +169,21 @@ export class OpenAIJudgeAdapter implements JudgeAdapter {
 export class GoogleDebaterAdapter implements DebaterAdapter {
   readonly provider = GOOGLE_PROVIDER;
   readonly model: string;
-  private genAI: GoogleGenerativeAI;
+  private genAI: GoogleGenAI;
 
   constructor(apiKey: string, model: string) {
     this.model = model;
-    this.genAI = new GoogleGenerativeAI(apiKey);
+    this.genAI = new GoogleGenAI({ apiKey });
   }
 
   async generate(prompt: string): Promise<LLMCallResult> {
-    const model = this.genAI.getGenerativeModel({
+    const response = await this.genAI.models.generateContent({
       model: this.model,
-      generationConfig: { temperature: 0.7, maxOutputTokens: 1024 },
+      contents: prompt,
+      config: { temperature: 0.7, maxOutputTokens: 1024 },
     });
 
-    const result = await model.generateContent(prompt);
-    const response = result.response;
-    const content = response.text() ?? "";
+    const content = response.text ?? "";
     const rawResponse = JSON.stringify({
       text: content,
       usageMetadata: response.usageMetadata,
@@ -199,7 +198,9 @@ export class GoogleDebaterAdapter implements DebaterAdapter {
         ? {
             promptTokens: response.usageMetadata.promptTokenCount,
             completionTokens: response.usageMetadata.candidatesTokenCount,
-            totalTokens: response.usageMetadata.totalTokenCount,
+            totalTokens:
+              (response.usageMetadata.promptTokenCount ?? 0) +
+              (response.usageMetadata.candidatesTokenCount ?? 0),
           }
         : undefined,
     };
@@ -210,12 +211,12 @@ export class GoogleJudgeAdapter implements JudgeAdapter {
   readonly name: string;
   readonly provider = GOOGLE_PROVIDER;
   readonly model: string;
-  private genAI: GoogleGenerativeAI;
+  private genAI: GoogleGenAI;
 
   constructor(name: string, apiKey: string, model: string) {
     this.name = name;
     this.model = model;
-    this.genAI = new GoogleGenerativeAI(apiKey);
+    this.genAI = new GoogleGenAI({ apiKey });
   }
 
   async judge(input: {
@@ -224,14 +225,13 @@ export class GoogleJudgeAdapter implements JudgeAdapter {
   }): Promise<LLMCallResult> {
     const prompt = `${input.rubricInstructions}\n\nDebate digest:\n${JSON.stringify(input.digest, null, 2)}`;
 
-    const model = this.genAI.getGenerativeModel({
+    const response = await this.genAI.models.generateContent({
       model: this.model,
-      generationConfig: { temperature: 0.1, maxOutputTokens: 512 },
+      contents: prompt,
+      config: { temperature: 0.1, maxOutputTokens: 512 },
     });
 
-    const result = await model.generateContent(prompt);
-    const response = result.response;
-    const content = response.text() ?? "";
+    const content = response.text ?? "";
     const rawResponse = JSON.stringify({
       text: content,
       usageMetadata: response.usageMetadata,
@@ -246,7 +246,9 @@ export class GoogleJudgeAdapter implements JudgeAdapter {
         ? {
             promptTokens: response.usageMetadata.promptTokenCount,
             completionTokens: response.usageMetadata.candidatesTokenCount,
-            totalTokens: response.usageMetadata.totalTokenCount,
+            totalTokens:
+              (response.usageMetadata.promptTokenCount ?? 0) +
+              (response.usageMetadata.candidatesTokenCount ?? 0),
           }
         : undefined,
     };
@@ -313,8 +315,10 @@ const OPENAI_MODELS = [
 ];
 
 const GOOGLE_MODELS = [
-  "gemini-1.5-pro",
+  "gemini-2.5-flash",
+  "gemini-2.0-flash",
   "gemini-1.5-flash",
+  "gemini-1.5-pro",
   "gemini-1.0-pro",
   "gemini-pro",
 ];

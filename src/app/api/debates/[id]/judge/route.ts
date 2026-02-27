@@ -9,7 +9,7 @@ import {
 } from "@/llm/adapters";
 
 const JUDGE_1_MODEL = process.env.JUDGE_1_MODEL ?? "gpt-4o";
-const JUDGE_2_MODEL = process.env.JUDGE_2_MODEL ?? "gemini-1.5-flash";
+const JUDGE_2_MODEL = process.env.JUDGE_2_MODEL ?? "gemini-2.5-flash";
 
 export async function POST(
   _req: NextRequest,

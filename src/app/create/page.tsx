@@ -7,9 +7,10 @@ const MODEL_OPTIONS = [
   "gpt-4o",
   "gpt-4o-mini",
   "gpt-4-turbo",
-  "gemini-1.5-pro",
+  "gemini-2.5-flash",
+  "gemini-2.0-flash",
   "gemini-1.5-flash",
-  "gemini-1.0-pro",
+  "gemini-pro",
 ];
 
 export default function CreateDebatePage() {

@@ -19,8 +19,14 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(debate, { status: 201 });
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Bad request";
-    return NextResponse.json({ error: message }, { status: 400 });
+    const cause =
+      err instanceof Error && "cause" in err && err.cause instanceof Error
+        ? err.cause.message
+        : null;
+    const message =
+      err instanceof Error ? err.message : "Bad request";
+    const detail = cause ? `${message} — ${cause}` : message;
+    return NextResponse.json({ error: detail }, { status: 400 });
   }
 }
 
