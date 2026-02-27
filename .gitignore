@@ -32,6 +32,17 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
+
+# training artifacts
+training/data/
+training/models/
+local-judge/models/
+
+# python
+__pycache__/
+*.pyc
+.venv/
 
 # vercel
 .vercel

@@ -1,0 +1,7 @@
+transformers>=4.47.0
+peft>=0.14.0
+trl>=0.13.0
+torch>=2.5.0
+accelerate>=1.2.0
+datasets>=3.2.0
+psycopg2-binary>=2.9.0
